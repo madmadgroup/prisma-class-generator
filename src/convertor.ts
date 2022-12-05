@@ -216,6 +216,18 @@ export class PrismaConvertor {
 				)
 				.map((v) => v.type),
 		)
+
+		const normalTypes = uniquify(
+			model.fields
+				.filter(
+					(field) =>
+						field.kind === 'object' &&
+						!field.relationName &&
+						model.name !== field.type,
+				)
+				.map((v) => v.type),
+		)
+
 		const enums = model.fields.filter((field) => field.kind === 'enum')
 
 		classComponent.fields = model.fields
@@ -235,7 +247,11 @@ export class PrismaConvertor {
 		classComponent.enumTypes =
 			extractRelationFields === true
 				? []
-				: enums.map((field) => field.type.toString())
+				: // : enums.map((field) => field.type.toString())
+				  [
+						...enums.map((field) => field.type.toString()),
+						...normalTypes,
+				  ]
 
 		if (useGraphQL) {
 			const deco = new DecoratorComponent({
